@@ -5,7 +5,11 @@ namespace Ntdll.Tests
 {
 	public class ObjectTypeTests
 	{
-
+		[Fact]
+		public void GetObjectType_DoesNotExist()
+		{
+			Assert.Null(NtdllHelper.GetObjectType(@"\BlahFooBar"));
+		}
 
 		[Fact]
 		public void GetObjectType_IsDirectory()
@@ -24,7 +28,5 @@ namespace Ntdll.Tests
 			// test C: symlink - tricky for parsing C: name
 			Assert.Equal("SymbolicLink", NtdllHelper.GetObjectType(@"\GLOBAL??\C:"));
 		}
-
-	
 	}
 }

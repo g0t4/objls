@@ -3,9 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace PInvoke.Ntdll
 {
-
 	/// <summary>
-	/// http://www.pinvoke.net/default.aspx/Structures/OBJECT_ATTRIBUTES.html
+	///     http://www.pinvoke.net/default.aspx/Structures/OBJECT_ATTRIBUTES.html
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential)]
 	public struct OBJECT_ATTRIBUTES : IDisposable
@@ -32,15 +31,11 @@ namespace PInvoke.Ntdll
 
 		public UNICODE_STRING ObjectName
 		{
-			get
-			{
-				return (UNICODE_STRING)Marshal.PtrToStructure(
-				 objectName, typeof(UNICODE_STRING));
-			}
+			get { return Marshal.PtrToStructure<UNICODE_STRING>(objectName); }
 
 			set
 			{
-				bool fDeleteOld = objectName != IntPtr.Zero;
+				var fDeleteOld = objectName != IntPtr.Zero;
 				if (!fDeleteOld)
 					objectName = Marshal.AllocHGlobal(Marshal.SizeOf(value));
 				Marshal.StructureToPtr(value, objectName, fDeleteOld);
@@ -51,11 +46,10 @@ namespace PInvoke.Ntdll
 		{
 			if (objectName != IntPtr.Zero)
 			{
-				Marshal.DestroyStructure(objectName, typeof(UNICODE_STRING));
+				Marshal.DestroyStructure<UNICODE_STRING>(objectName);
 				Marshal.FreeHGlobal(objectName);
 				objectName = IntPtr.Zero;
 			}
 		}
 	}
-
 }

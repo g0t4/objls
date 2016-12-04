@@ -1,4 +1,3 @@
-using objls;
 using Xunit;
 
 namespace Ntdll.Tests

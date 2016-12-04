@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace objls
+namespace Ntdll
 {
 
 	// http://www.pinvoke.net/default.aspx/Enums/ACCESS_MASK.html

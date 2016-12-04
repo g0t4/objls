@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace objls
+namespace Ntdll
 {
 	/// <summary>
 	/// https://msdn.microsoft.com/en-us/library/windows/hardware/ff550671(v=vs.85).aspx

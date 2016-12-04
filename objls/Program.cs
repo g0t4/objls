@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32.SafeHandles;
 using objls;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static System.Console;
@@ -10,11 +11,11 @@ class Program
 	static void Main(string[] args)
 	{
 		var objectName = @"\clfs";
-		var type = NtdllHelper.QueryObjectType(objectName);
+		var type = NtdllHelper.GetObjectType(objectName);
 
 		WriteLine(objectName);
 		WriteLine(type);
-		//return;
+		return;
 
 		var objects = QueryDirectoryObjects(objectName);
 		WriteLine($"Object Directory of {objectName}");

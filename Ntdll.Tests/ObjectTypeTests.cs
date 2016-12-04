@@ -5,24 +5,26 @@ namespace Ntdll.Tests
 {
 	public class ObjectTypeTests
 	{
+
+
 		[Fact]
-		public void GetObjectType_IsDirectory_ReturnsDirectory()
+		public void GetObjectType_IsDirectory()
 		{
-			var directory = @"\GLOBAL??";
+			// test global namespace root 
+			Assert.Equal("Directory", NtdllHelper.GetObjectType(@"\"));
 
-			var type = NtdllHelper.GetObjectType(directory);
-
-			Assert.Equal(type, "Directory");
+			// test ? on end of directory name
+			Assert.Equal("Directory", NtdllHelper.GetObjectType(@"\GLOBAL??"));
 		}
 
 		[Fact]
-		public void GetObjectType_IsNotADirectory_ReturnsOtherwise()
+		public void GetObjectType_IsNotDirectory()
 		{
-			var directory = @"\GLOBAL??\C:";
-
-			var type = NtdllHelper.GetObjectType(directory);
-
-			Assert.Equal(type, "NOT");
+			Assert.Equal("Device", NtdllHelper.GetObjectType(@"\clfs"));
+			// test C: symlink - tricky for parsing C: name
+			Assert.Equal("SymbolicLink", NtdllHelper.GetObjectType(@"\GLOBAL??\C:"));
 		}
+
+	
 	}
 }

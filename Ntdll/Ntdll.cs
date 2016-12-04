@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
@@ -46,7 +48,6 @@ namespace PInvoke.Ntdll
 			var handle = OpenDirectoryObject(objectName);
 			if (handle != null)
 				return ObjectTypeFromHandle(handle);
-
 			// Seems to be no way to get a handle for any file easily, NtOpenFile might work but seems overkill, so how about just
 			// query the directory above if OpenDirectoryObject fails because teh objectName isn't a directory, then look at child items for 
 			// the objectName's type
@@ -56,11 +57,19 @@ namespace PInvoke.Ntdll
 
 		private static string TryGetTypeFromDirectoryEntires(string objectName)
 		{
-			var parentDiretory = Path.GetDirectoryName(objectName);
-			var objectFileName = Path.GetFileName(objectName);
-			Console.WriteLine(parentDiretory);
+			// note: Path.GetFileName doesn't work with C: on end, other likely trouble so I'm not going to use it
+			var split = objectName.LastIndexOf(@"\");
+			// if last \ found at 0, then that's the root object namespace, make sure not to set parentDirectory to an empty string
+			var parentDirectory = split == 0 ? @"\" : objectName.Substring(0, split); 
+			var objectFileName = objectName.Substring(split + 1);
+			
+			// todo what if parentDirectory is a SymbolicLink?
+			var objects = QueryDirectoryObjects(parentDirectory);
+			var desiredObject = objects.FirstOrDefault(o => o.Name == objectFileName);
+			Console.WriteLine(parentDirectory);
 			Console.WriteLine(objectFileName);
-			return null;
+			Console.WriteLine(desiredObject.TypeName);
+			return desiredObject.TypeName;
 		}
 
 		public static string ObjectTypeFromHandle(SafeFileHandle handle)
@@ -108,6 +117,56 @@ namespace PInvoke.Ntdll
 			Marshal.FreeHGlobal(informationPointer); //free pointer when not Successful
 
 			return IntPtr.Zero;
+		}
+
+		public static IEnumerable<ObjectDirectoryInformation> QueryDirectoryObjects(string objectName)
+		{
+			var directoryHandle = OpenDirectoryObject(objectName);
+			// throw?
+			if (directoryHandle == null) return Enumerable.Empty<ObjectDirectoryInformation>();
+
+			using (directoryHandle)
+			{
+				return QueryDirectoryObjects(directoryHandle);
+			}
+		}
+
+		private static IEnumerable<ObjectDirectoryInformation> QueryDirectoryObjects(SafeFileHandle directoryHandle)
+		{
+			var bufferSize = 1024;
+			var buffer = Marshal.AllocHGlobal(bufferSize);
+			uint context = 0;
+			var objects = new List<ObjectDirectoryInformation>();
+			for (;;)
+			{
+				var status = Ntdll.NtQueryDirectoryObject(directoryHandle, buffer, bufferSize,
+					true, context == 0, ref context, out var lengthRead);
+				if (status < 0) break;
+
+				var objectDirectoryInformation = Marshal.PtrToStructure<OBJECT_DIRECTORY_INFORMATION>(buffer);
+				objects.Add(new ObjectDirectoryInformation(objectDirectoryInformation, context));
+			}
+			Marshal.FreeHGlobal(buffer);
+			return objects;
+		}
+
+		public struct ObjectDirectoryInformation
+		{
+			public string Name;
+			public string TypeName;
+			public uint Context;
+
+			public ObjectDirectoryInformation(OBJECT_DIRECTORY_INFORMATION objectDirectoryInformation, uint context) : this()
+			{
+				Name = objectDirectoryInformation.Name.ToString();
+				TypeName = objectDirectoryInformation.TypeName.ToString();
+				Context = context;
+			}
+
+			public bool IsDirectory()
+			{
+				return TypeName == "Directory";
+			}
 		}
 	}
 }

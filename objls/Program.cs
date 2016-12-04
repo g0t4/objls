@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Ntdll;
+using PInvoke.Ntdll;
 using static System.Console;
 
 class Program
@@ -70,7 +70,7 @@ class Program
 		var objects = new List<ObjectDirectoryInformation>();
 		for (;;)
 		{
-			var status = Ntdll.Ntdll.NtQueryDirectoryObject(directoryHandle, buffer, bufferSize,
+			var status = Ntdll.NtQueryDirectoryObject(directoryHandle, buffer, bufferSize,
 			  true, context == 0, ref context, out var lengthRead);
 			if (status < 0) break;
 

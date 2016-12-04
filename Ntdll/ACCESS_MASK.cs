@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Ntdll
+namespace PInvoke.Ntdll
 {
 
 	// http://www.pinvoke.net/default.aspx/Enums/ACCESS_MASK.html

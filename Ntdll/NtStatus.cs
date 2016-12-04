@@ -1,4 +1,4 @@
-﻿namespace Ntdll
+﻿namespace PInvoke.Ntdll
 {
 	/// <summary>
 	/// https://msdn.microsoft.com/en-us/library/windows/hardware/ff565436(v=vs.85).aspx

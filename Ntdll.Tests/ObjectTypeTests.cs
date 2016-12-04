@@ -1,3 +1,4 @@
+using PInvoke.Ntdll;
 using Xunit;
 
 namespace Ntdll.Tests

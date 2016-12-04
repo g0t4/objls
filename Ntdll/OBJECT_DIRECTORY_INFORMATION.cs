@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Ntdll
+namespace PInvoke.Ntdll
 {
 	/// <summary>
 	/// http://www.pinvoke.net/default.aspx/Structures/OBJECT_DIRECTORY_INFORMATION.html

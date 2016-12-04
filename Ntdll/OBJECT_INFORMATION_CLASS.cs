@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Ntdll
+namespace PInvoke.Ntdll
 {
 
 	/// <summary>

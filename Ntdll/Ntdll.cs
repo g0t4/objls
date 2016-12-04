@@ -5,7 +5,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace objls
 {
-	internal class Ntdll
+	public class Ntdll
 	{
 		//http://www.pinvoke.net/default.aspx/ntdll.ntopendirectoryobject
 		[DllImport("ntdll.dll")]

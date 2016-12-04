@@ -27,6 +27,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Ntdll\Ntdll.csproj" />
     <ProjectReference Include="..\objls\objls.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

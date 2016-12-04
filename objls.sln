@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.25920.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "objls", "objls\objls.csproj", "{A8AA5E89-7866-4F47-8061-7173C75AB713}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ntdll", "Ntdll\Ntdll.csproj", "{F4DE6989-CD62-4F45-8A98-16A07494EFA6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{A8AA5E89-7866-4F47-8061-7173C75AB713}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8AA5E89-7866-4F47-8061-7173C75AB713}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8AA5E89-7866-4F47-8061-7173C75AB713}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4DE6989-CD62-4F45-8A98-16A07494EFA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4DE6989-CD62-4F45-8A98-16A07494EFA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4DE6989-CD62-4F45-8A98-16A07494EFA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4DE6989-CD62-4F45-8A98-16A07494EFA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

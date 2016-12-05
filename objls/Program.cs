@@ -26,12 +26,11 @@ internal class Program
 
 	private static void ListDirectoryContents(string objectName)
 	{
-
-		WriteLine();
-		WriteLine($"Directory contents:");
-		WriteLine();
-
 		var objects = NtdllHelper.QueryDirectoryObjects(objectName);
+
+		WriteLine();
+		WriteLine($"Directory contents ({objects.Count()} objects):");
+		WriteLine();
 
 		var typeColumnLength = objects.Max(o => o.TypeName.Length) + 1;
 

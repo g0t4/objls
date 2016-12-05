@@ -33,6 +33,46 @@ namespace PInvoke.Ntdll
 
 	public class NtdllHelper
 	{
+		public static string GetSymbolicLinkObjectTarget(string objectName)
+		{
+			var type = GetObjectType(objectName);
+			if (type != "SymbolicLink")
+			{
+				return null;
+			}
+			var objectAttributes = new OBJECT_ATTRIBUTES(objectName, 0);
+			var status = Ntdll.NtOpenFile(out var handle,
+				ACCESS_MASK.FILE_READ_ATTRIBUTES,
+				ref objectAttributes, out var ioStatusBlock,
+				(ulong)ShareAccess.FILE_SHARE_READ,
+				(ulong)CreateOptions.OPEN_EXISTING);
+			
+			if (status < 0)
+			{
+				// todo throw?
+				Console.WriteLine("Open file failed with status " + status);
+				return null;
+			}
+
+			// note: cool just used OpenFile to get an object's type, maybe this works for every type!
+			return ObjectTypeFromHandle(handle);
+		}
+
+		// https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
+		enum ShareAccess : ulong
+		{
+			FILE_SHARE_READ = 0x01,
+		}
+
+		enum CreateOptions : ulong
+		{
+			CREATE_ALWAYS =2,
+			CREATE_NEW = 1,
+			OPEN_ALWAYS = 4,
+			OPEN_EXISTING = 3,
+			TRUNCATE_EXISTING = 5
+		}
+
 		/// <summary>
 		///     This only opens a Directory type object, returning a handle to it.
 		/// </summary>

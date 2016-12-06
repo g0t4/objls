@@ -5,15 +5,12 @@ using Microsoft.Win32.SafeHandles;
 
 namespace PInvoke.Ntdll
 {
-    public class DirectoryObject
-    {
-	    public string Name { get; }
-
-	    public DirectoryObject(string name)
-	    {
+	public class DirectoryObject : Object
+	{
+		public DirectoryObject(string name) : base(name, "Directory")
+		{
 			// todo throw if not directory object?
-			Name = name;
-	    }
+		}
 
 		/// <summary>
 		///     This only opens a directory object, returning a handle to it.
@@ -25,11 +22,11 @@ namespace PInvoke.Ntdll
 			return status < 0 ? null : handle;
 		}
 
-		public IEnumerable<ObjectDirectoryInformation> QueryDirectoryObjects()
+		public IEnumerable<Object> QueryDirectoryObjects()
 		{
 			var directoryHandle = Open();
 			// throw?
-			if (directoryHandle == null) return Enumerable.Empty<ObjectDirectoryInformation>();
+			if (directoryHandle == null) return Enumerable.Empty<Object>();
 
 			using (directoryHandle)
 			{
@@ -37,13 +34,13 @@ namespace PInvoke.Ntdll
 			}
 		}
 
-		private static IEnumerable<ObjectDirectoryInformation> QueryDirectoryObjects(SafeFileHandle directoryHandle)
+		private static IEnumerable<Object> QueryDirectoryObjects(SafeFileHandle directoryHandle)
 		{
 			var bufferSize = 1024;
 			var buffer = Marshal.AllocHGlobal(bufferSize);
 			uint context = 0;
 			// todo use object model here too
-			var objects = new List<ObjectDirectoryInformation>();
+			var objects = new List<Object>();
 			for (;;)
 			{
 				var status = Ntdll.NtQueryDirectoryObject(directoryHandle, buffer, bufferSize,
@@ -51,31 +48,14 @@ namespace PInvoke.Ntdll
 				if (status < 0) break;
 
 				var objectDirectoryInformation = Marshal.PtrToStructure<OBJECT_DIRECTORY_INFORMATION>(buffer);
-				objects.Add(new ObjectDirectoryInformation(objectDirectoryInformation, context));
+				if (objectDirectoryInformation.TypeName.ToString() == "Directory")
+					objects.Add(new DirectoryObject(objectDirectoryInformation.Name.ToString()));
+				else
+					objects.Add(new Object(objectDirectoryInformation.Name.ToString(),
+						objectDirectoryInformation.TypeName.ToString()));
 			}
 			Marshal.FreeHGlobal(buffer);
 			return objects;
-		}
-
-	}
-
-
-	public struct ObjectDirectoryInformation
-	{
-		public string Name;
-		public string TypeName;
-		public uint Context;
-
-		public ObjectDirectoryInformation(OBJECT_DIRECTORY_INFORMATION objectDirectoryInformation, uint context) : this()
-		{
-			Name = objectDirectoryInformation.Name.ToString();
-			TypeName = objectDirectoryInformation.TypeName.ToString();
-			Context = context;
-		}
-
-		public bool IsDirectory()
-		{
-			return TypeName == "Directory";
 		}
 	}
 }

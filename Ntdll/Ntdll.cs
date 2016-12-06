@@ -102,7 +102,7 @@ namespace PInvoke.Ntdll
 			// todo what if parentDirectory is a SymbolicLink?
 			var objects = new DirectoryObject(parentDirectory).QueryDirectoryObjects();
 			var desiredObject = objects.FirstOrDefault(o => o.Name == objectFileName);
-			return desiredObject.TypeName;
+			return desiredObject?.TypeName;
 		}
 
 		public static string ObjectTypeFromHandle(SafeFileHandle handle)

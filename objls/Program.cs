@@ -35,7 +35,7 @@ internal class Program
 		var typeColumnLength = objects.Max(o => o.TypeName.Length) + 1;
 
 		var sortedObjects = objects
-			.OrderByDescending(o => o.IsDirectory())
+			.OrderByDescending(o => o is DirectoryObject)
 			.ThenBy(o => o.Name);
 
 		foreach (var @object in sortedObjects)

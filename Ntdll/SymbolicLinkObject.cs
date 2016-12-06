@@ -11,7 +11,7 @@
 		{
 			var type = NtdllHelper.GetObjectType(Name);
 			if (type != "SymbolicLink")
-				return null;
+				return Result<string>.Failed("Not a symbolic link");	
 
 			var objectAttributes = new OBJECT_ATTRIBUTES(Name, 0);
 			var status = Ntdll.NtOpenSymbolicLinkObject(

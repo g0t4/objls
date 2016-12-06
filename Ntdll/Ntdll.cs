@@ -51,10 +51,6 @@ namespace PInvoke.Ntdll
 	{
 		public static string GetObjectType(string objectName)
 		{
-			// todo remove - should work with else condition if directory too
-			var handle = new DirectoryObject(objectName).Open();
-			if (handle != null)
-				return ObjectTypeFromHandle(handle);
 			// Seems to be no way to get a handle for any file easily, NtOpenFile might work but seems overkill, so how about just
 			// query the directory above if OpenDirectoryObject fails because teh objectName isn't a directory, then look at child items for 
 			// the objectName's type
@@ -64,6 +60,11 @@ namespace PInvoke.Ntdll
 
 		private static string TryGetTypeFromDirectoryEntires(string objectName)
 		{
+			// special edge case where there's not a parent / child relationship to query the object type from a directory object
+			if (objectName == @"\")
+			{
+				return "Directory";
+			}
 			// note: Path.GetFileName doesn't work with C: on end, other likely trouble so I'm not going to use it
 			var split = objectName.LastIndexOf(@"\");
 			// if last \ found at 0, then that's the root object namespace, make sure not to set parentDirectory to an empty string

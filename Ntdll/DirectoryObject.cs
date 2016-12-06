@@ -48,11 +48,7 @@ namespace PInvoke.Ntdll
 				if (status < 0) break;
 
 				var objectDirectoryInformation = Marshal.PtrToStructure<OBJECT_DIRECTORY_INFORMATION>(buffer);
-				if (objectDirectoryInformation.TypeName.ToString() == "Directory")
-					objects.Add(new DirectoryObject(objectDirectoryInformation.Name.ToString()));
-				else
-					objects.Add(new Object(objectDirectoryInformation.Name.ToString(),
-						objectDirectoryInformation.TypeName.ToString()));
+				objects.Add(objectDirectoryInformation.ToObject());
 			}
 			Marshal.FreeHGlobal(buffer);
 			return objects;

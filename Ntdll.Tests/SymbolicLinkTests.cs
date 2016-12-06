@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using PInvoke.Ntdll;
+﻿using PInvoke.Ntdll;
 using Xunit;
 
 namespace Ntdll.Tests
 {
-    public class SymbolicLinkObjectTests
-    {
+	public class SymbolicLinkObjectTests
+	{
 		[Fact]
 		public void GetSymbolicLinkObjectTarget()
 		{
-			Assert.Equal(@"\Device\BitLocker", NtdllHelper.GetSymbolicLinkObjectTarget(@"\GLOBAL??\BitLocker").Value);
+			var target = new SymbolicLinkObject(@"\GLOBAL??\BitLocker").GetLinkTarget();
+
+			Assert.True(target.Success);
+			Assert.Equal(@"\Device\BitLocker", target.Value);
 		}
 	}
 }

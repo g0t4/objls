@@ -17,6 +17,8 @@ namespace PInvoke.Ntdll
 			{
 				case "Directory":
 					return new DirectoryObject(Name.ToString());
+				case "SymbolicLink":
+					return new SymbolicLinkObject(Name.ToString());
 				default:
 					return new Object(Name.ToString(), TypeName.ToString());
 			}

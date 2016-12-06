@@ -49,35 +49,6 @@ namespace PInvoke.Ntdll
 
 	public class NtdllHelper
 	{
-		public static Result<string> GetSymbolicLinkObjectTarget(string objectName)
-		{
-			var type = GetObjectType(objectName);
-			if (type != "SymbolicLink")
-				return null;
-
-			var objectAttributes = new OBJECT_ATTRIBUTES(objectName, 0);
-			var status = Ntdll.NtOpenSymbolicLinkObject(
-				out var linkHandle,
-				ACCESS_MASK.GENERIC_READ,
-				ref objectAttributes);
-			if (status < 0)
-			{
-				return Result<string>.Failed("Open file failed with status " + status);
-			}
-
-			using (linkHandle)
-			{
-				var targetBuffer = new UNICODE_STRING(new string(' ', 512));
-				status = Ntdll.NtQuerySymbolicLinkObject(
-					linkHandle,
-					ref targetBuffer,
-					out var len);
-				return status < 0
-					? Result<string>.Failed("Query link failed with status " + status)
-					: Result<string>.Succeeded(targetBuffer.ToString());
-			}
-		}
-
 		public static string GetObjectType(string objectName)
 		{
 			// todo remove - should work with else condition if directory too
@@ -167,6 +138,5 @@ namespace PInvoke.Ntdll
 			OPEN_EXISTING = 3,
 			TRUNCATE_EXISTING = 5
 		}
-
 	}
 }

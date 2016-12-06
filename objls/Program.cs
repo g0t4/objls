@@ -24,9 +24,9 @@ internal class Program
 		}
 	}
 
-	private static void ListDirectoryContents(string objectName)
+	private static void ListDirectoryContents(string directoryObjectName)
 	{
-		var objects = new DirectoryObject(objectName).QueryDirectoryObjects();
+		var objects = new DirectoryObject(directoryObjectName).QueryDirectoryObjects();
 
 		WriteLine();
 		WriteLine($"Directory contents ({objects.Count()} objects):");
@@ -40,9 +40,11 @@ internal class Program
 
 		foreach (var @object in sortedObjects)
 		{
+			var fullObjectName = directoryObjectName.ObjectNameJoin(@object.Name);
+
 			if (@object.TypeName == "SymbolicLink")
 			{
-				var linkTarget = new SymbolicLinkObject($"{objectName}\\{@object.Name}").GetLinkTarget();
+				var linkTarget = new SymbolicLinkObject(fullObjectName).GetLinkTarget();
 				var printLink = linkTarget.Success ? linkTarget.Value : linkTarget.FailureReason;
 				WriteLine("{0,-" + typeColumnLength + "} {1} {2}", @object.TypeName, @object.Name, printLink);
 			}

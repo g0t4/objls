@@ -78,19 +78,10 @@ namespace PInvoke.Ntdll
 			}
 		}
 
-		/// <summary>
-		///     This only opens a Directory type object, returning a handle to it.
-		/// </summary>
-		public static SafeFileHandle OpenDirectoryObject(string objectName)
-		{
-			var objectAttributes = new OBJECT_ATTRIBUTES(objectName, 0);
-			var status = Ntdll.NtOpenDirectoryObject(out var handle, ACCESS_MASK.DIRECTORY_QUERY, ref objectAttributes);
-			return status < 0 ? null : handle;
-		}
-
 		public static string GetObjectType(string objectName)
 		{
-			var handle = OpenDirectoryObject(objectName);
+			// todo remove - should work with else condition if directory too
+			var handle = new DirectoryObject(objectName).Open();
 			if (handle != null)
 				return ObjectTypeFromHandle(handle);
 			// Seems to be no way to get a handle for any file easily, NtOpenFile might work but seems overkill, so how about just
@@ -109,7 +100,7 @@ namespace PInvoke.Ntdll
 			var objectFileName = objectName.Substring(split + 1);
 
 			// todo what if parentDirectory is a SymbolicLink?
-			var objects = QueryDirectoryObjects(parentDirectory);
+			var objects = new DirectoryObject(parentDirectory).QueryDirectoryObjects();
 			var desiredObject = objects.FirstOrDefault(o => o.Name == objectFileName);
 			return desiredObject.TypeName;
 		}
@@ -161,36 +152,6 @@ namespace PInvoke.Ntdll
 			return IntPtr.Zero;
 		}
 
-		public static IEnumerable<ObjectDirectoryInformation> QueryDirectoryObjects(string objectName)
-		{
-			var directoryHandle = OpenDirectoryObject(objectName);
-			// throw?
-			if (directoryHandle == null) return Enumerable.Empty<ObjectDirectoryInformation>();
-
-			using (directoryHandle)
-			{
-				return QueryDirectoryObjects(directoryHandle);
-			}
-		}
-
-		private static IEnumerable<ObjectDirectoryInformation> QueryDirectoryObjects(SafeFileHandle directoryHandle)
-		{
-			var bufferSize = 1024;
-			var buffer = Marshal.AllocHGlobal(bufferSize);
-			uint context = 0;
-			var objects = new List<ObjectDirectoryInformation>();
-			for (;;)
-			{
-				var status = Ntdll.NtQueryDirectoryObject(directoryHandle, buffer, bufferSize,
-					true, context == 0, ref context, out var lengthRead);
-				if (status < 0) break;
-
-				var objectDirectoryInformation = Marshal.PtrToStructure<OBJECT_DIRECTORY_INFORMATION>(buffer);
-				objects.Add(new ObjectDirectoryInformation(objectDirectoryInformation, context));
-			}
-			Marshal.FreeHGlobal(buffer);
-			return objects;
-		}
 
 		// https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
 		private enum ShareAccess : ulong
@@ -207,23 +168,5 @@ namespace PInvoke.Ntdll
 			TRUNCATE_EXISTING = 5
 		}
 
-		public struct ObjectDirectoryInformation
-		{
-			public string Name;
-			public string TypeName;
-			public uint Context;
-
-			public ObjectDirectoryInformation(OBJECT_DIRECTORY_INFORMATION objectDirectoryInformation, uint context) : this()
-			{
-				Name = objectDirectoryInformation.Name.ToString();
-				TypeName = objectDirectoryInformation.TypeName.ToString();
-				Context = context;
-			}
-
-			public bool IsDirectory()
-			{
-				return TypeName == "Directory";
-			}
-		}
 	}
 }

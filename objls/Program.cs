@@ -26,7 +26,7 @@ internal class Program
 
 	private static void ListDirectoryContents(string objectName)
 	{
-		var objects = NtdllHelper.QueryDirectoryObjects(objectName);
+		var objects = new DirectoryObject(objectName).QueryDirectoryObjects();
 
 		WriteLine();
 		WriteLine($"Directory contents ({objects.Count()} objects):");

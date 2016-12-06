@@ -40,7 +40,15 @@ internal class Program
 
 		foreach (var @object in sortedObjects)
 		{
-			WriteLine("{0,-" + typeColumnLength + "} {1}", @object.TypeName, @object.Name);
+			if (@object.TypeName == "SymbolicLink")
+			{
+				var linkTarget = NtdllHelper.GetSymbolicLinkObjectTarget($"{objectName}\\{@object.Name}");
+				WriteLine("{0,-" + typeColumnLength + "} {1} {2}", @object.TypeName, @object.Name, linkTarget);
+			}
+			else
+			{
+				WriteLine("{0,-" + typeColumnLength + "} {1}", @object.TypeName, @object.Name);
+			}
 		}
 	}
 }

@@ -63,7 +63,7 @@ namespace PInvoke.Ntdll
 			if (status < 0)
 			{
 				// todo throw?
-				Console.WriteLine("Open file failed with status " + status);
+				Console.Error.WriteLine("Open file failed with status " + status);
 				return null;
 			}
 
@@ -113,9 +113,6 @@ namespace PInvoke.Ntdll
 			// todo what if parentDirectory is a SymbolicLink?
 			var objects = QueryDirectoryObjects(parentDirectory);
 			var desiredObject = objects.FirstOrDefault(o => o.Name == objectFileName);
-			Console.WriteLine(parentDirectory);
-			Console.WriteLine(objectFileName);
-			Console.WriteLine(desiredObject.TypeName);
 			return desiredObject.TypeName;
 		}
 

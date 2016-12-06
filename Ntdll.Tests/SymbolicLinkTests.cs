@@ -11,7 +11,7 @@ namespace Ntdll.Tests
 		[Fact]
 		public void GetSymbolicLinkObjectTarget()
 		{
-			Assert.Equal(@"\Device\BitLocker", NtdllHelper.GetSymbolicLinkObjectTarget(@"\GLOBAL??\BitLocker"));
+			Assert.Equal(@"\Device\BitLocker", NtdllHelper.GetSymbolicLinkObjectTarget(@"\GLOBAL??\BitLocker").Value);
 		}
 	}
 }

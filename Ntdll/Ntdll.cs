@@ -49,7 +49,7 @@ namespace PInvoke.Ntdll
 
 	public class NtdllHelper
 	{
-		public static string GetSymbolicLinkObjectTarget(string objectName)
+		public static Result<string> GetSymbolicLinkObjectTarget(string objectName)
 		{
 			var type = GetObjectType(objectName);
 			if (type != "SymbolicLink")
@@ -62,9 +62,7 @@ namespace PInvoke.Ntdll
 				ref objectAttributes);
 			if (status < 0)
 			{
-				// todo throw?
-				Console.Error.WriteLine("Open file failed with status " + status);
-				return null;
+				return Result<string>.Failed("Open file failed with status " + status);
 			}
 
 			using (linkHandle)
@@ -75,8 +73,8 @@ namespace PInvoke.Ntdll
 					ref targetBuffer,
 					out var len);
 				return status < 0
-					? null
-					: targetBuffer.ToString();
+					? Result<string>.Failed("Query link failed with status " + status)
+					: Result<string>.Succeeded(targetBuffer.ToString());
 			}
 		}
 

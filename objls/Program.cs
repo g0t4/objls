@@ -43,7 +43,8 @@ internal class Program
 			if (@object.TypeName == "SymbolicLink")
 			{
 				var linkTarget = NtdllHelper.GetSymbolicLinkObjectTarget($"{objectName}\\{@object.Name}");
-				WriteLine("{0,-" + typeColumnLength + "} {1} {2}", @object.TypeName, @object.Name, linkTarget);
+				var printLink = linkTarget.Success ? linkTarget.Value : linkTarget.FailureReason;
+				WriteLine("{0,-" + typeColumnLength + "} {1} {2}", @object.TypeName, @object.Name, printLink);
 			}
 			else
 			{

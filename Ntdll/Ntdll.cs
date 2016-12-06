@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
@@ -27,8 +26,25 @@ namespace PInvoke.Ntdll
 			IntPtr informationPtr, uint informationLength, ref uint returnLength);
 
 		[DllImport("ntdll.dll")]
-		public static extern NtStatus NtOpenFile(out SafeFileHandle objectHandle, ACCESS_MASK desiredAccess,
-			ref OBJECT_ATTRIBUTES objectAttributes, out IO_STATUS_BLOCK ioStatusBlock, ulong shareAccess, ulong openOptions);
+		public static extern NtStatus NtOpenFile(
+			out SafeFileHandle objectHandle,
+			ACCESS_MASK desiredAccess,
+			ref OBJECT_ATTRIBUTES objectAttributes,
+			out IO_STATUS_BLOCK ioStatusBlock,
+			ulong shareAccess,
+			ulong openOptions);
+
+		[DllImport("ntdll.dll")]
+		public static extern int NtOpenSymbolicLinkObject(
+			out SafeFileHandle linkHandle,
+			ACCESS_MASK desiredAccess,
+			ref OBJECT_ATTRIBUTES objectAttributes);
+
+		[DllImport("ntdll.dll")]
+		public static extern int NtQuerySymbolicLinkObject(
+			SafeFileHandle linkHandle,
+			ref UNICODE_STRING linkTarget,
+			out int returnedLength);
 	}
 
 	public class NtdllHelper
@@ -37,16 +53,13 @@ namespace PInvoke.Ntdll
 		{
 			var type = GetObjectType(objectName);
 			if (type != "SymbolicLink")
-			{
 				return null;
-			}
+
 			var objectAttributes = new OBJECT_ATTRIBUTES(objectName, 0);
-			var status = Ntdll.NtOpenFile(out var handle,
-				ACCESS_MASK.FILE_READ_ATTRIBUTES,
-				ref objectAttributes, out var ioStatusBlock,
-				(ulong)ShareAccess.FILE_SHARE_READ,
-				(ulong)CreateOptions.OPEN_EXISTING);
-			
+			var status = Ntdll.NtOpenSymbolicLinkObject(
+				out var linkHandle,
+				ACCESS_MASK.GENERIC_READ,
+				ref objectAttributes);
 			if (status < 0)
 			{
 				// todo throw?
@@ -54,23 +67,17 @@ namespace PInvoke.Ntdll
 				return null;
 			}
 
-			// note: cool just used OpenFile to get an object's type, maybe this works for every type!
-			return ObjectTypeFromHandle(handle);
-		}
-
-		// https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
-		enum ShareAccess : ulong
-		{
-			FILE_SHARE_READ = 0x01,
-		}
-
-		enum CreateOptions : ulong
-		{
-			CREATE_ALWAYS =2,
-			CREATE_NEW = 1,
-			OPEN_ALWAYS = 4,
-			OPEN_EXISTING = 3,
-			TRUNCATE_EXISTING = 5
+			using (linkHandle)
+			{
+				var targetBuffer = new UNICODE_STRING(new string(' ', 512));
+				status = Ntdll.NtQuerySymbolicLinkObject(
+					linkHandle,
+					ref targetBuffer,
+					out var len);
+				return status < 0
+					? null
+					: targetBuffer.ToString();
+			}
 		}
 
 		/// <summary>
@@ -100,9 +107,9 @@ namespace PInvoke.Ntdll
 			// note: Path.GetFileName doesn't work with C: on end, other likely trouble so I'm not going to use it
 			var split = objectName.LastIndexOf(@"\");
 			// if last \ found at 0, then that's the root object namespace, make sure not to set parentDirectory to an empty string
-			var parentDirectory = split == 0 ? @"\" : objectName.Substring(0, split); 
+			var parentDirectory = split == 0 ? @"\" : objectName.Substring(0, split);
 			var objectFileName = objectName.Substring(split + 1);
-			
+
 			// todo what if parentDirectory is a SymbolicLink?
 			var objects = QueryDirectoryObjects(parentDirectory);
 			var desiredObject = objects.FirstOrDefault(o => o.Name == objectFileName);
@@ -188,6 +195,21 @@ namespace PInvoke.Ntdll
 			}
 			Marshal.FreeHGlobal(buffer);
 			return objects;
+		}
+
+		// https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
+		private enum ShareAccess : ulong
+		{
+			FILE_SHARE_READ = 0x01
+		}
+
+		private enum CreateOptions : ulong
+		{
+			CREATE_ALWAYS = 2,
+			CREATE_NEW = 1,
+			OPEN_ALWAYS = 4,
+			OPEN_EXISTING = 3,
+			TRUNCATE_EXISTING = 5
 		}
 
 		public struct ObjectDirectoryInformation
